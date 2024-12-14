@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets as q
+from PyQt6 import QtWidgets as q
 from qfluentwidgets import LineEdit, CheckBox, LineEdit
 
 class DataWindow(q.QWidget):

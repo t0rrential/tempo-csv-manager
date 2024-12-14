@@ -4,8 +4,8 @@ from json import dumps, load
 from src import validate_csv
 from src import csv_parse
 
-from PyQt5.QtCore import Qt
-from PyQt5 import QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6 import QtWidgets
 from qfluentwidgets import LineEdit, CheckBox, LineEdit, PushButton, FluentIcon, InfoBarPosition, InfoBar, SmoothScrollArea
 
 class LoginWindow(QtWidgets.QWidget):
@@ -65,18 +65,18 @@ class LoginWindow(QtWidgets.QWidget):
         # Create save and calculate buttons
         self.buttons = QtWidgets.QWidget()
         buttonLayout = QtWidgets.QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignLeft)
+        buttonLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.buttons.setLayout(buttonLayout)
         
         self.submit = PushButton(self.spacer + "Save CSV Values")
         self.submit.setIcon(FluentIcon.SAVE)
-        self.submit.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.submit.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
         self.submit.setStyleSheet("QAbstractButton {qproperty-icon: align-center;}")
         self.submit.clicked.connect(lambda: self.saveJson())
         
         self.calculate = PushButton(self.spacer + "Calculate Routes")
         self.calculate.setIcon(FluentIcon.SEND_FILL)
-        self.calculate.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.calculate.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
         self.calculate.setStyleSheet("QAbstractButton {qproperty-icon: align-center;}")
         # self.calculate.clicked.connect()
 
@@ -152,7 +152,7 @@ class LoginWindow(QtWidgets.QWidget):
         InfoBar.error(
             title='Warning',
             content=infobarMsg,
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP_RIGHT,
             duration=2000,

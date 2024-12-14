@@ -3,14 +3,11 @@ import sys
 from src.loginWindow import LoginWindow
 from src.dataWindow import DataWindow
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 # from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QMainWindow, QSizePolicy, QStackedWidget, QApplication
-from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
+from PyQt6 import QtGui
+from PyQt6.QtCore import Qt
 from qfluentwidgets import LineEdit, CheckBox, PushButton, FluentIcon, SplitFluentWindow
-
-
-
 
 class MainWindow(QtWidgets.QMainWindow):
     spacer = "         "
@@ -28,17 +25,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.button1 = PushButton(" CSV Editing ")
         self.button1 = PushButton(self.spacer + "  CSV  ")
         self.button1.setIcon(FluentIcon.ALIGNMENT)
-        self.button1.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.button1.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
         self.button1.setStyleSheet("QAbstractButton {qproperty-icon: align-center;}")
 
         
         # self.button2 = PushButton("Data Analysis")
         self.button2 = PushButton(self.spacer + "Routes")
         self.button2.setIcon(FluentIcon.COMMAND_PROMPT)
-        self.button2.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.button2.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
         self.button2.setStyleSheet("QAbstractButton {qproperty-icon: align-center;}")
 
-        sidebarLayout.setAlignment(Qt.AlignTop)
+        sidebarLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         sidebarLayout.addWidget(self.button1)
         sidebarLayout.addWidget(self.button2)
         
@@ -67,8 +64,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-    QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    # QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    # QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
     app = QtWidgets.QApplication(sys.argv)
     
@@ -76,5 +73,5 @@ if __name__ == "__main__":
     mainWindow = MainWindow()
     mainWindow.show()
     
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
