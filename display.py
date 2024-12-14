@@ -4,9 +4,13 @@ from src.loginWindow import LoginWindow
 from src.dataWindow import DataWindow
 
 from PyQt5 import QtWidgets
+# from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QMainWindow, QSizePolicy, QStackedWidget, QApplication
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from qfluentwidgets import LineEdit, CheckBox, PushButton, FluentIcon
+from qfluentwidgets import LineEdit, CheckBox, PushButton, FluentIcon, SplitFluentWindow
+
+
+
 
 class MainWindow(QtWidgets.QMainWindow):
     spacer = "         "
