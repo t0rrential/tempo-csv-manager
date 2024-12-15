@@ -1,17 +1,23 @@
 import os
 from json import dumps, load
 
-from src import validate_csv
-from src import csv_parse
+from src.ValidateCsv import validate_csv
+from src.CsvParse import dictToJson
 
 from PyQt6.QtCore import Qt
 from PyQt6 import QtWidgets
-from qfluentwidgets import LineEdit, CheckBox, LineEdit, PushButton, FluentIcon, InfoBarPosition, InfoBar, SmoothScrollArea
+from qfluentwidgets import LineEdit, CheckBox, LineEdit, PushButton, FluentIcon, InfoBarPosition, InfoBar, SmoothScrollArea, isDarkTheme, TransparentPushButton, CardWidget, SimpleCardWidget
 
-class LoginWindow(QtWidgets.QWidget):
+from qfluentwidgets.components.widgets.label import CaptionLabel
+
+from qframelesswindow import FramelessWindow, AcrylicWindow
+
+# class LoginWindow(QtWidgets.QWidget):
+class LoginWindow(SimpleCardWidget):
+# class LoginWindow(AcrylicWindow):
+
     # create dict to reference textboxes
     csvElements = {}
-    spacer = "         "
     
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -19,7 +25,8 @@ class LoginWindow(QtWidgets.QWidget):
         # Create the scroll area and widget to hold the layout
         self.scroll = SmoothScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.widget = QtWidgets.QWidget()
+        # self.widget = QtWidgets.QWidget()
+        self.widget = SimpleCardWidget()
         
         # Create the layout with textboxes and checkboxes
         self.outerLayout = QtWidgets.QVBoxLayout()
@@ -34,16 +41,18 @@ class LoginWindow(QtWidgets.QWidget):
         # for i in range(0, 5):
             subelements = {}
         
-            outFrame = QtWidgets.QFrame()
-            outFrame.setStyleSheet(".QFrame{ border: 3px solid gray; border-radius: 10px;}");
+            # outFrame = QtWidgets.QFrame()
+            # outFrame.setStyleSheet(".QFrame{ border: 3px solid gray; border-radius: 10px;}");
+            outFrame = CardWidget()
             
             topLayout = QtWidgets.QFormLayout()
             itemName = LineEdit()
             profit = LineEdit()
             
-            topLayout.addRow(QtWidgets.QLabel(f"{csv}"))
-            topLayout.addRow("Item Name:", itemName)
-            topLayout.addRow("Profit (Cashout - Price):", profit)
+            # topLayout.addRow(QtWidgets.QLabel(f"{csv}"))
+            topLayout.addRow(CaptionLabel(f"{csv}"))
+            topLayout.addRow(CaptionLabel(f"Item Name:"), itemName)
+            topLayout.addRow(CaptionLabel(f"Sale Price:"), profit)
             
             outFrame.setLayout(topLayout)
             
@@ -61,23 +70,21 @@ class LoginWindow(QtWidgets.QWidget):
         # Set the outer layout to the widget and add widget to scroll area
         self.widget.setLayout(self.outerLayout)
         self.scroll.setWidget(self.widget)
+        self.scroll.enableTransparentBackground()
         
         # Create save and calculate buttons
-        self.buttons = QtWidgets.QWidget()
+        # self.buttons = QtWidgets.QWidget()
+        self.buttons = SimpleCardWidget()
         buttonLayout = QtWidgets.QHBoxLayout()
         buttonLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.buttons.setLayout(buttonLayout)
         
-        self.submit = PushButton(self.spacer + "Save CSV Values")
-        self.submit.setIcon(FluentIcon.SAVE)
+        self.submit = TransparentPushButton(FluentIcon.SAVE, "Save CSV Values", self)
         self.submit.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
-        self.submit.setStyleSheet("QAbstractButton {qproperty-icon: align-center;}")
         self.submit.clicked.connect(lambda: self.saveJson())
         
-        self.calculate = PushButton(self.spacer + "Calculate Routes")
-        self.calculate.setIcon(FluentIcon.SEND_FILL)
+        self.calculate = TransparentPushButton(FluentIcon.SEND_FILL, "Calculate Routes", self)
         self.calculate.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
-        self.calculate.setStyleSheet("QAbstractButton {qproperty-icon: align-center;}")
         # self.calculate.clicked.connect()
 
         buttonLayout.addWidget(self.submit)
@@ -85,7 +92,7 @@ class LoginWindow(QtWidgets.QWidget):
         
         # Set scroll area as the main layout
         mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(self.buttons)
+        #mainLayout.addWidget(self.buttons)
         mainLayout.addWidget(self.scroll)
         self.setLayout(mainLayout)
         self.prefill()
@@ -124,14 +131,14 @@ class LoginWindow(QtWidgets.QWidget):
             if itemName == "":
                 self.showErrorBar("itemName", path)
                 
-            if validate_csv.validate_csv(path):
+            if validate_csv(path):
                 self.showErrorBar("path", path)
                 
             formattedDict[itemName] = {}
             formattedDict[itemName]["path"] = path
             formattedDict[itemName]["profit"] = int(profit)        
         
-        csv_parse.dictToJson(formattedDict)
+        dictToJson(formattedDict)
         with open("preload.json", "w") as f:
             f.write(dumps(formattedDict, indent=4))
         
@@ -159,3 +166,8 @@ class LoginWindow(QtWidgets.QWidget):
             parent=self
         )
         return
+
+    # def setQss(self):
+    #     color = 'dark' if isDarkTheme() else 'light'
+    #     with open(f'testing/resource/{color}/demo.qss', encoding='utf-8') as f:
+    #         self.setStyleSheet(f.read())
