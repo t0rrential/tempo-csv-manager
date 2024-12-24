@@ -31,7 +31,7 @@ class Router():
         self.addresses : list[str] = []  # List of addresses
         self.gclient : googlemaps.Client = googlemaps.Client(key=GOOGLE_MAPS_APIKEY)
 
-    def load_store_data(address : str):
+    def load_store_data(self, address : str):
         """Load data for a specific store from its JSON file.\n"""
         filepath = path.join(STORE_DATA_DIR, f'{address.replace(" ", "_")}.json')
         if path.exists(filepath):
@@ -76,15 +76,6 @@ class Router():
                 self.store_files["coordinate_response"] = response
                 
                 self.save_store_data(address)
-                
-    # def fixAddressPermutations(self):
-    #     for address in self.addresses:
-    #         self.store_files[address]["added_permutations"] = []
-            
-    #         for permutation in self.store_files[address]["permutations"]:
-    #             item : list = list(set(permutation) - set([address]))[0]
-    #             self.store_files[address]["added_permutations"].append(item)
-    #         self.save_store_data(address)
                 
     def addressPermutations(self):
         for address in self.addresses:
@@ -179,3 +170,11 @@ class Router():
         final = self.travellingSalesman()
         
         return final
+    
+    def storeCount(self):
+        return len(self.addresses)
+    
+    def loadStoreInfo():
+        if path.exists("data.txt"):
+            with open("data.txt", "r") as f:
+                return load(f)

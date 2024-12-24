@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QApplication
 
 from src.UITemplate import Widget, StackedWidget, CustomTitleBar
 from src.loginWindow import LoginWindow
-from src.dataWindow import DataWindow
+from src.routerWindow import RouterWindow
 
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, MessageBox,
                             isDarkTheme, setTheme, Theme, toggleTheme, setThemeColor, QConfig)
@@ -39,7 +39,7 @@ class Window(AcrylicWindow):
         # create sub interface
         # self.homeInterface = Widget('Home Interface', self)
         self.homeInterface = LoginWindow(self)
-        self.appInterface = DataWindow(self)
+        self.appInterface = RouterWindow(self)
         # self.videoInterface = Widget('Video Interface', self)
         # self.libraryInterface = Widget('library Interface', self)
 
