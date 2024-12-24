@@ -1,5 +1,7 @@
 __pycache__/
 testing/
+pathfinding/
+store_data - Copy/
 .vscode/
 *.pyc
 .env

@@ -48,11 +48,15 @@ class LoginWindow(SimpleCardWidget):
             topLayout = QtWidgets.QFormLayout()
             itemName = LineEdit()
             profit = LineEdit()
+            id = LineEdit()
+            
             
             # topLayout.addRow(QtWidgets.QLabel(f"{csv}"))
             topLayout.addRow(CaptionLabel(f"{csv}"))
             topLayout.addRow(CaptionLabel(f"Item Name:"), itemName)
             topLayout.addRow(CaptionLabel(f"Sale Price:"), profit)
+            topLayout.addRow(CaptionLabel(f"Item ID:"), id)
+
             
             outFrame.setLayout(topLayout)
             
@@ -92,7 +96,7 @@ class LoginWindow(SimpleCardWidget):
         
         # Set scroll area as the main layout
         mainLayout = QtWidgets.QVBoxLayout()
-        #mainLayout.addWidget(self.buttons)
+        mainLayout.addWidget(self.buttons)
         mainLayout.addWidget(self.scroll)
         self.setLayout(mainLayout)
         self.prefill()

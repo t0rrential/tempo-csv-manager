@@ -1,6 +1,8 @@
 # tempo-csv-manager
 
 todo:
-> convert to pyqt6
-> navbar
-> better ui
+> discord integration
+> finish datawindow
+> full datawindow integration into mainwindow and good compatibility with loginwindow
+> add recalc button to loginwindow
+> setup gmaps static image api

@@ -6,8 +6,8 @@ from PyQt6.QtGui import QIcon, QDesktopServices
 from PyQt6.QtWidgets import QHBoxLayout, QApplication
 
 from src.UITemplate import Widget, StackedWidget, CustomTitleBar
-from src.LoginWindow import LoginWindow
-from src.DataWindow import DataWindow
+from src.loginWindow import LoginWindow
+from src.dataWindow import DataWindow
 
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, MessageBox,
                             isDarkTheme, setTheme, Theme, toggleTheme, setThemeColor, QConfig)
@@ -21,13 +21,15 @@ class Window(AcrylicWindow):
         super().__init__()
         titleBar = CustomTitleBar(self)
         titleBar.linkThemeToggleButton(lambda: self.toggleCurrentTheme())
+        titleBar.setIcon("logo.png")
+        self.setWindowIcon(QIcon('logo.png'))
         self.setTitleBar(titleBar)
 
         # theme set
         setTheme(Theme.AUTO)
         
         # change the theme color
-        setThemeColor('#0078d4')
+        setThemeColor('#ff4357')
         
         self.windowEffect.setMicaEffect(self.winId(), False)
         self.hBoxLayout = QHBoxLayout(self)
@@ -36,8 +38,8 @@ class Window(AcrylicWindow):
 
         # create sub interface
         # self.homeInterface = Widget('Home Interface', self)
-        self.homeInterface = LoginWindow()
-        self.appInterface = Widget('Application Interface', self)
+        self.homeInterface = LoginWindow(self)
+        self.appInterface = DataWindow(self)
         # self.videoInterface = Widget('Video Interface', self)
         # self.libraryInterface = Widget('library Interface', self)
 
