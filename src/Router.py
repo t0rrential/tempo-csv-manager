@@ -1,6 +1,6 @@
 
 # TO-DO:
-# make this genuinely fucking modular
+# make this genuinely freaking modular
 
 # currently only the json part is modular, this entire script
 # still holds all the stores in a single variable. nothing has
@@ -132,7 +132,7 @@ class Router():
         for address in self.addresses[:numStores]:
             for target in self.store_files[address]['distances'].keys():
                 if target in self.addresses[:numStores]:
-                    formatted_tsp.append((self.addresses.index(address), self.addresses.index(target), info["distance"]))
+                    formatted_tsp.append((self.addresses.index(address), self.addresses.index(target), self.store_files[address]["distances"][target]['distance']))
 
         fitness_distances = TravellingSales(distances=formatted_tsp)
         problem_fit = TSPOpt(length=numStores, fitness_fn=fitness_distances, maximize=False)
