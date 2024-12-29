@@ -77,7 +77,7 @@ class RouterWindow(QWidget):
 
         for i, address in enumerate(self.storeInfo.keys()):
             self.table.setItem(i, 0, QTableWidgetItem(address))
-            
+            # self.table.setItem(i, 0, QTableWidgetItem("no peeking :3"))
             itemList = ""
             for item in self.storeInfo[address]['itemList'][:-1]:
                 itemList += item + ", "

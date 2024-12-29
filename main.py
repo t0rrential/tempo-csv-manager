@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QApplication
 from src.UITemplate import Widget, StackedWidget, CustomTitleBar
 from src.loginWindow import LoginWindow
 from src.routerWindow import RouterWindow
+from src.SettingsBox import SettingsBox
 
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, MessageBox,
                             isDarkTheme, setTheme, Theme, toggleTheme, setThemeColor, QConfig)
@@ -64,6 +65,15 @@ class Window(AcrylicWindow):
         # self.addSubInterface(self.videoInterface, FIF.VIDEO, 'test')
 
         # self.addSubInterface(self.libraryInterface, FIF.BOOK_SHELF, 'test', NavigationItemPosition.BOTTOM, FIF.LIBRARY_FILL)
+        self.navigationBar.addItem(
+            routeKey='Settings',
+            icon=FIF.SETTING,
+            text='Settings',
+            onClick=self.showSettingBox,
+            selectable=False,
+            position=NavigationItemPosition.BOTTOM,
+        )
+        
         self.navigationBar.addItem(
             routeKey='About Me',
             icon=FIF.HELP,
@@ -124,6 +134,13 @@ class Window(AcrylicWindow):
         if w.exec():
             QDesktopServices.openUrl(QUrl("https://github.com/t0rrential"))
     
+    def showSettingBox(self):
+        # implement custom messagebox class here\
+        w = SettingsBox(self)
+        if w.exec():
+            w.validate()
+        return    
+    
     def toggleCurrentTheme(self):
         theme = Theme.LIGHT if isDarkTheme() else Theme.DARK  
         color = 'light' if isDarkTheme() else 'dark'
@@ -139,7 +156,6 @@ class Window(AcrylicWindow):
 if __name__ == '__main__':
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
-    print("hello")
     app = QApplication(sys.argv)
     w = Window()
     w.show()

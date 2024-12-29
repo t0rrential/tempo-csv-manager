@@ -9,6 +9,8 @@
 from json import dumps, load
 from os import getenv, path, makedirs, listdir
 from dotenv import load_dotenv
+import googlemaps.addressvalidation
+import googlemaps.client
 from mlrose_ky import TravellingSales, TSPOpt, genetic_alg
 
 import simplekml
@@ -178,3 +180,34 @@ class Router():
         if path.exists("data.txt"):
             with open("data.txt", "r") as f:
                 return load(f)
+            
+    def checkKey(testKey):
+        try:
+            testClient = googlemaps.Client(key=testKey)
+        except:
+            return False
+        try:
+            # Make a simple geocoding request
+            geocode_result = testClient.geocode("1600 Amphitheatre Parkway, Mountain View, CA")
+
+            # Check if the request was successful
+            if geocode_result:
+                return True
+            else:
+                return False
+        except googlemaps.exceptions.ApiError as e:
+            return False
+        
+    def checkAddress(testKey, testAddress):
+        testClient = googlemaps.Client(key=testKey)
+        address_result = {}
+        
+        try:
+            address_result = googlemaps.addressvalidation.addressvalidation(client=testClient, addressLines=[testAddress])
+        except:
+            return False
+        
+        if 'error' not in address_result.keys():
+            if address_result['result']['address']['addressComponents'][0]['confirmationLevel'] == "CONFIRMED":
+                return True
+        return False
