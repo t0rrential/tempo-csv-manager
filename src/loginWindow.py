@@ -6,19 +6,18 @@ from src.CsvParse import dictToJson
 
 from PyQt6.QtCore import Qt
 from PyQt6 import QtWidgets
-from qfluentwidgets import (LineEdit, LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBoxBase, MessageBox,
-                           SmoothScrollArea, TransparentPushButton, CardWidget, SimpleCardWidget, DisplayLabel, BodyLabel)
+from qfluentwidgets import (LineEdit, LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBox,
+                           SmoothScrollArea, TransparentPushButton, CardWidget, SimpleCardWidget, SearchLineEdit)
 
 from qfluentwidgets.components.widgets.label import CaptionLabel
 
 class LoginWindow(SimpleCardWidget):
 
     # create dict to reference textboxes
-    csvElements = {}
-    
+        
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        
+        self.csvElements = {}
         # Create the scroll area and widget to hold the layout
         self.scroll = SmoothScrollArea()
         self.scroll.setWidgetResizable(True)
@@ -45,9 +44,15 @@ class LoginWindow(SimpleCardWidget):
         self.submit = TransparentPushButton(FluentIcon.SAVE, "Save CSV Values", self)
         self.submit.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
         self.submit.clicked.connect(lambda: self.saveJson())
+        
+        self.search = SearchLineEdit()
+        self.search.setPlaceholderText("Search for a CSV by filename or itemname")
+        self.search.searchSignal.connect(lambda: self.searchCSV(self.search.text()))
+        self.search.clearSignal.connect(lambda: self.searchCSV(""))
 
         buttonLayout.addWidget(self.submit)
-        
+        buttonLayout.addWidget(self.search, Qt.AlignmentFlag.AlignLeft)
+                
         # Set scroll area as the main layout
         mainLayout = QtWidgets.QVBoxLayout()
         mainLayout.addWidget(self.buttons)
@@ -55,22 +60,17 @@ class LoginWindow(SimpleCardWidget):
         self.setLayout(mainLayout)
         self.prefill()
     
-    def fillTable(self):
-        while self.outerLayout.count():
-            child = self.outerLayout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
-        
+    def fillTable(self):        
         # get list of csvs
         try:
             csvs = os.listdir("csv\\")
         except Exception as e:
             print(e)
-        
+                
         # create elements
         for idx, csv in enumerate(csvs):
             subelements = {}
-            print(csv)
+            #print(csv)
             outFrame = CardWidget()
             
             topLayout = QtWidgets.QVBoxLayout()
@@ -104,13 +104,15 @@ class LoginWindow(SimpleCardWidget):
             
             self.outerLayout.addWidget(outFrame)
             
-            subelements["path"] = "csv\\" + csv
+            subelements["path"] = csv
             subelements["outframe"] = outFrame
             subelements["itemName"] = itemName
             subelements["profit"] = profit
             subelements["id"] = id
             
             self.csvElements[idx] = subelements
+        
+        #print(len(self.csvElements))
     
     def prefill(self):
         # using the data in previously stored csvs created by updatejson,
@@ -193,3 +195,22 @@ class LoginWindow(SimpleCardWidget):
             self.csvElements.pop(index, None)
             self.fillTable()
             self.prefill()
+            
+    def searchCSV(self, query):
+        # search through csvElements (holds widgets)
+        keys = []
+        
+        for key in self.csvElements.keys():
+            if query in self.csvElements[key]['itemName'].text() or query in self.csvElements[key]['path']:
+                keys.append(key)
+                
+        self.updateOuterLayoutVisibility(keys)
+    
+    def updateOuterLayoutVisibility(self, elements : list):
+        for index in range(self.outerLayout.count()):
+            if index in elements:
+                self.outerLayout.itemAt(index).widget().setVisible(True)
+            else:
+                self.outerLayout.itemAt(index).widget().setVisible(False)
+
+        
