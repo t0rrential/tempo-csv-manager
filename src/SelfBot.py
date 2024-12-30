@@ -1,4 +1,4 @@
-import discord
+# import discord
 from time import sleep
 import requests
 

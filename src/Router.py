@@ -1,4 +1,3 @@
-
 # TO-DO:
 # make this genuinely freaking modular
 
@@ -7,7 +6,7 @@
 # changed from the original processing.py
 
 from json import dumps, load
-from os import getenv, path, makedirs, listdir
+from os import getenv, path, makedirs
 from dotenv import load_dotenv
 import googlemaps.addressvalidation
 import googlemaps.client

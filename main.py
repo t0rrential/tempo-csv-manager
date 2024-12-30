@@ -5,15 +5,15 @@ from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QIcon, QDesktopServices
 from PyQt6.QtWidgets import QHBoxLayout, QApplication
 
-from src.UITemplate import Widget, StackedWidget, CustomTitleBar
+from src.UITemplate import StackedWidget, CustomTitleBar
 from src.loginWindow import LoginWindow
 from src.routerWindow import RouterWindow
 from src.SettingsBox import SettingsBox
 
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, MessageBox,
-                            isDarkTheme, setTheme, Theme, toggleTheme, setThemeColor, QConfig)
+                            isDarkTheme, setTheme, Theme, setThemeColor)
 from qfluentwidgets import FluentIcon as FIF
-from qframelesswindow import FramelessWindow, AcrylicWindow
+from qframelesswindow import AcrylicWindow
 
 #class Window(FramelessWindow):
 class Window(AcrylicWindow):

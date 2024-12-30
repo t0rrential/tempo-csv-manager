@@ -1,6 +1,3 @@
-# coding:utf-8
-import sys
-
 from PyQt6.QtCore import Qt, pyqtSignal, QEasingCurve
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QFrame, QWidget
