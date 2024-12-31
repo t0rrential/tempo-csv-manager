@@ -63,10 +63,10 @@ class Router():
                     key=lambda k: self.storedata[k]['store_profit'],
                     reverse=True
                 )
-                
                 self.addresses.insert(0, HOME_ADDRESS)
                 for address in self.addresses:
                     self.store_files[address] = self.load_store_data(address)
+        print(len(self.store_files.keys()))
     
     def findCoordinates(self):
         for address in self.addresses:
@@ -86,6 +86,7 @@ class Router():
             if len(uniques) > 0:
                 for unique_address in uniques:
                     self.store_files[address]['permutations'].append([unique_address, address])
+                    self.store_files[address]['added_permutations'].append(unique_address)
                     
             self.save_store_data(address)
             
@@ -93,34 +94,38 @@ class Router():
         for address in self.addresses:
             for pair in self.store_files[address]['permutations']:
                 addr1, addr2 = pair
-                try:
-                    print(f"working on {pair}")
-                    
-                    response = self.gclient.distance_matrix([addr1], [addr2], mode="driving", units="imperial")
-                    distance = float(response["rows"][0]["elements"][0]["distance"]["text"].split()[0])
-                    
-                    self.store_files[addr1]['distances'][addr2] = {
-                        'distance': distance,
-                        'response' : response
-                    }
-                    
-                    self.store_files[addr2]['distances'][addr1] = {
-                        'distance': distance,
-                        'response' : response
-                    }
-                    
-                    self.save_store_data(addr1)
-                    self.save_store_data(addr2)
-                except Exception as e:
-                    print(f"error on {pair} with exception {e}")
+                if (addr1 in self.addresses) and (addr2 in self.addresses):
+                    if addr1 not in self.store_files[addr2]['distances'].keys() or addr2 not in self.store_files[addr1]['distances'].keys():
+                        try:
+                            print(f"working on {pair}")
+                            
+                            response = self.gclient.distance_matrix([addr1], [addr2], mode="driving", units="imperial")
+                            distance = float(response["rows"][0]["elements"][0]["distance"]["text"].split()[0])
+                            
+                            self.store_files[addr1]['distances'][addr2] = {
+                                'distance': distance,
+                                'response' : response
+                            }
+                            
+                            self.store_files[addr2]['distances'][addr1] = {
+                                'distance': distance,
+                                'response' : response
+                            }
+                            
+                            self.save_store_data(addr1)
+                            self.save_store_data(addr2)
+                        except Exception as e:
+                            print(f"error on {pair} with exception {e}")
     
     def findTime(self, address, target):
+        """Finds the time between two addresses that have been stored in self.store_files."""
         address = self.addresses[address]
         target = self.addresses[target]
         
         return self.store_files[address]['distances'][target]['response']['rows'][0]['elements'][0]['duration']['value']
     
     def travellingSalesman(self, numStores : int, numMins: int):
+        """Applies a travelling salesman solver to the info stored in self.store_files."""
         totaltime = 0
         formatted_tsp = []
         # formatted_tsp[n] = [addr1, addr2, dist]
@@ -163,24 +168,28 @@ class Router():
             'time' : totaltime
         }
     
-    def run(self):
+    def run(self, numStores, numMins):
+        """Runs prefill(), findCoordinates(), addressPermutations(), addressMatrix(), and returns travellingSalesman()."""
         self.prefill()
         self.findCoordinates()
         self.addressPermutations()
         self.addressMatrix()
-        final = self.travellingSalesman()
+        final = self.travellingSalesman(numStores, numMins)
         
         return final
     
     def storeCount(self):
+        """Returns number of store addresses."""
         return len(self.addresses)
     
-    def loadStoreInfo():
+    def extractData():
+        """Returns a dict with data.txt loaded."""
         if path.exists("data.txt"):
             with open("data.txt", "r") as f:
                 return load(f)
             
     def checkKey(testKey):
+        """Check if a given Google Maps API key is valid."""
         try:
             testClient = googlemaps.Client(key=testKey)
         except:
@@ -198,6 +207,7 @@ class Router():
             return False
         
     def checkAddress(testKey, testAddress):
+        """Check if a given address is valid using the Google Maps API."""
         testClient = googlemaps.Client(key=testKey)
         address_result = {}
         
@@ -210,3 +220,6 @@ class Router():
             if address_result['result']['address']['addressComponents'][0]['confirmationLevel'] == "CONFIRMED":
                 return True
         return False
+    
+    def getHomeAddress():
+        return HOME_ADDRESS

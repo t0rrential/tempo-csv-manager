@@ -1,7 +1,7 @@
 from petl import fromcsv, validate, values
 
 def validate_csv(path):
-    table = fromcsv(path)
+    table = fromcsv("csv\\" + path)
     header = ("Address", " City", " State", " ZIP", " Backroom Stock", " Floor Stock", " In Transit Stock", " Price", " Aisles")
     problems = validate(table, header=header)
     # print(problems.lookall())

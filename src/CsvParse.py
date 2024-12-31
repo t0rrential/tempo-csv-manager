@@ -8,7 +8,7 @@ def dictToJson(inputDict: dict):
 
     for key in inputDict.keys():
         
-        with open(inputDict[key]['path'], 'r') as file:
+        with open("csv\\" + inputDict[key]['path'], 'r') as file:
             reader = csv.DictReader(file)
             
             for row in reader:

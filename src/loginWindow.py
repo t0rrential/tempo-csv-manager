@@ -6,7 +6,7 @@ from src.CsvParse import dictToJson
 
 from PyQt6.QtCore import Qt
 from PyQt6 import QtWidgets
-from qfluentwidgets import (LineEdit, LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBox,
+from qfluentwidgets import (LineEdit, LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBox, TransparentToolButton,
                            SmoothScrollArea, TransparentPushButton, CardWidget, SimpleCardWidget, SearchLineEdit)
 
 from qfluentwidgets.components.widgets.label import CaptionLabel
@@ -45,11 +45,15 @@ class LoginWindow(SimpleCardWidget):
         self.submit.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
         self.submit.clicked.connect(lambda: self.saveJson())
         
+        self.refresh = TransparentToolButton(FluentIcon.SYNC, self)
+        self.refresh.clicked.connect(lambda: self.searchCSV(""))
+        
         self.search = SearchLineEdit()
         self.search.setPlaceholderText("Search for a CSV by filename or itemname")
         self.search.searchSignal.connect(lambda: self.searchCSV(self.search.text()))
         self.search.clearSignal.connect(lambda: self.searchCSV(""))
 
+        buttonLayout.addWidget(self.refresh)
         buttonLayout.addWidget(self.submit)
         buttonLayout.addWidget(self.search, Qt.AlignmentFlag.AlignLeft)
                 
@@ -81,7 +85,6 @@ class LoginWindow(SimpleCardWidget):
             
             # create inputs
             remove = TransparentPushButton(FluentIcon.CANCEL_MEDIUM, "Remove")
-            
                 # lambda explanation:
                 # _ is the signal param passed to connect, which we can discard
                 # by doing csv_path = csv, we can ensure self.removeCSV gets the correct one
@@ -193,6 +196,8 @@ class LoginWindow(SimpleCardWidget):
         if w.exec():
             os.remove(f"csv/{csvPath}")
             self.csvElements.pop(index, None)
+            # self.saveJson()
+            # self.searchCSV("") 
             self.fillTable()
             self.prefill()
             
