@@ -66,7 +66,7 @@ class Router():
                 self.addresses.insert(0, HOME_ADDRESS)
                 for address in self.addresses:
                     self.store_files[address] = self.load_store_data(address)
-        print(len(self.store_files.keys()))
+        # print(len(self.store_files.keys()))
     
     def findCoordinates(self):
         for address in self.addresses:
@@ -97,7 +97,7 @@ class Router():
                 if (addr1 in self.addresses) and (addr2 in self.addresses):
                     if addr1 not in self.store_files[addr2]['distances'].keys() or addr2 not in self.store_files[addr1]['distances'].keys():
                         try:
-                            print(f"working on {pair}")
+                            # print(f"working on {pair}")
                             
                             response = self.gclient.distance_matrix([addr1], [addr2], mode="driving", units="imperial")
                             distance = float(response["rows"][0]["elements"][0]["distance"]["text"].split()[0])

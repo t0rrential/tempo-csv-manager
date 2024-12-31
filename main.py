@@ -145,8 +145,7 @@ class Window(AcrylicWindow):
         theme = Theme.LIGHT if isDarkTheme() else Theme.DARK  
         color = 'light' if isDarkTheme() else 'dark'
         
-        print(f"theme: {theme} color: {color}")
-        
+        #print(f"theme: {theme} color: {color}")
         
         with open(f'resource/{color}/demo.qss', encoding='utf-8') as f:
             self.setStyleSheet(f.read())

@@ -1,17 +1,16 @@
 # TO-DO
-# > add sort-by to table
+# > selection is based on index and not row itself
+#   > add some sort of dict that connects row, index, and selection status?
 # > connect to router
-# > rewrite router to accept address list
-# > figure out how to implement multi-select or maybe even write your own widget 
 
 import locale
 
 from src.Router import Router
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QListWidgetItem, QLabel, QFileDialog, QTableWidgetItem, QSizePolicy, QHeaderView, QAbstractItemView
-from qfluentwidgets import (SearchLineEdit, PushButton, ListWidget, MessageBox, LineEdit, SimpleCardWidget, TableWidget, CheckBox, FluentIcon, SpinBox, CommandBar, Action,
-                            TransparentToolButton, ComboBox)
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTableWidgetItem, QSizePolicy, QHeaderView, QAbstractItemView
+from qfluentwidgets import (SearchLineEdit, PushButton, SimpleCardWidget, TableWidget, FluentIcon, SpinBox, CommandBar, Action,
+                            TransparentToolButton, ComboBox, BodyLabel)
 
 
 
@@ -22,8 +21,10 @@ class RouterWindow(QWidget):
         locale.setlocale(locale.LC_ALL, '')
         self.selected = []
         self.router = Router()
+        self.homeAddress = Router.getHomeAddress()
         self.router.prefill()
         self.storeInfo = Router.extractData()
+        self.storeKeys = []
         
         self.setObjectName("routerWindow")
         
@@ -111,8 +112,8 @@ class RouterWindow(QWidget):
         self.filterList = {
             "By Profit Descending" : sorted(self.storeInfo.keys(), key = lambda k : self.storeInfo[k]['store_profit'], reverse=True),
             "By Profit Ascending" : sorted(self.storeInfo.keys(), key = lambda k : self.storeInfo[k]['store_profit']),
-            "By Closest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][Router.getHomeAddress()]['distance']),
-            "By Furthest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][Router.getHomeAddress()]['distance'], reverse=True)
+            "By Closest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][self.homeAddress]['distance']),
+            "By Furthest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][self.homeAddress]['distance'], reverse=True)
         }
         self.filterBy.addItems([key for key in self.filterList.keys()])
         self.filterBy.currentIndexChanged.connect(lambda i: self.drawTable(list(self.filterList)[i]))
@@ -129,43 +130,54 @@ class RouterWindow(QWidget):
         self.table.setBorderVisible(True)
         self.table.setBorderRadius(8)
         self.table.setWordWrap(True)
-        self.table.setColumnCount(3)
+        self.table.setColumnCount(4)
         self.table.setRowCount(self.router.storeCount() - 1)
-        self.table.setHorizontalHeaderLabels(["Address", "Items", "Profits"])
+        self.table.setHorizontalHeaderLabels(["Address", "Items", "Profits", "Distance"])
         self.table.verticalHeader().hide()
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.itemSelectionChanged.connect(self.updateInfoBar)
+        
+        self.submitButton = PushButton(FluentIcon.SEND, "")
+        
+        self.infoBar = SimpleCardWidget()
+        self.infoBarLayout = QHBoxLayout()
+        self.tableInfo = BodyLabel()
+        self.infoBarLayout.addWidget(self.tableInfo)
+        self.infoBar.setLayout(self.infoBarLayout)
         
         self.drawTable("By Profit Descending")
         
+        self.updateInfoBar()
+        
         self.tableHolderOuterVBox.addWidget(self.table)
+        self.tableHolderOuterVBox.addWidget(self.infoBar)
         self.tableHolderOuterVBox.addWidget(self.submitButton)
       
     def searchTable(self, query):
         keys = []
-        sortedKeys = self.filterList[self.currentFilter]
         
-        for idx, address in enumerate(sortedKeys):
-            if query in address:
+        for idx, address in enumerate(self.storeKeys):
+            if query in address or query.lower() in address.lower():
                 keys.append(address)
         
         self.updateVisibility(keys)
         
     def updateVisibility(self, keys):
-        sortedKeys = self.filterList[self.currentFilter]
-
-        for i, address in enumerate(sortedKeys):
+        for i, address in enumerate(self.storeKeys):
             if address in keys:
                 self.table.showRow(i)
             else:
                 self.table.hideRow(i)
+        self.updateInfoBar()
         
     def drawTable(self, filter):
-        sortedKeys = self.filterList[filter]
+        self.storeKeys = self.filterList[filter]
         self.currentFilter = filter
+        runtime = 0
         
-        for i, address in enumerate(sortedKeys):
+        for i, address in enumerate(self.storeKeys):
+            runtime += 1
             self.table.setItem(i, 0, QTableWidgetItem(address))
-            # self.table.setItem(i, 0, QTableWidgetItem("no peeking :3"))
             itemList = ""
             for item in self.storeInfo[address]['itemList'][:-1]:
                 itemList += item + ", "
@@ -173,32 +185,49 @@ class RouterWindow(QWidget):
             
             self.table.setItem(i, 1, QTableWidgetItem(itemList))
             self.table.setItem(i, 2, QTableWidgetItem(locale.currency(self.storeInfo[address]['store_profit'], grouping=True)))    
-
-        self.submitButton = PushButton(FluentIcon.SEND, "Find Route")
+            self.table.setItem(i, 3, QTableWidgetItem(f"{self.router.store_files[address]['distances'][self.homeAddress]['distance']} mi"))
+            
+            # self.table.setItem(i, 0, QTableWidgetItem("no peeking :3"))
+            # self.table.setItem(i, 1, QTableWidgetItem("no peeking :3"))
+        
+        self.searchTable(self.searchBar.text())
+        self.submitButton.setText(f"Find Route {self.currentFilter}")
         
     def selectAllRows(self):
         """Select all rows in the table."""
-        self.table.selectAll()
-
+        alreadySelected = set([idx.row() for idx in self.table.selectedIndexes()])
+        for rowIdx in range(0, self.table.rowCount()):
+            if not self.table.isRowHidden(rowIdx) and rowIdx not in alreadySelected:
+                self.table.selectRow(rowIdx)
+                
     def deselectAllRows(self):
         """Deselect all rows in the table."""
-        self.table.clearSelection()
+        for rowIdx in range(0, self.table.rowCount()):
+            if not self.table.isRowHidden(rowIdx):
+                for col in range(4):
+                    selectionModel = self.table.selectionModel()
+                    selectionModel.select(self.table.model().index(rowIdx, col), selectionModel.SelectionFlag.Deselect)
+
+        self.table.updateSelectedRows()
+        # only in python is it harder to unselect
         
     def selectTopRows(self):
         """Select the top N rows based on the input in the LineEdit."""
-        try:
-            num = int(self.numStoresEdit.text())
-            self.deselectAllRows()
-            if num >= 1:
-                for i in range(min(num, self.table.rowCount())):
-                    self.table.selectRow(i)
-        except ValueError:
-            pass
+        num = int(self.numStoresEdit.text())
+        if num >= 1:
+            for i in range(min(num, self.table.rowCount())):
+                self.table.selectRow(i)
+
         
-        #self.hBoxLayout = QHBoxLayout()
-        #self.mainLayout.addLayout(self.hBoxLayout)
-
-        # self.searchBox = SearchLineEdit(self)
-        # self.searchBox.setPlaceholderText("test")
-        # self.mainLayout.addWidget(self.searchBox, 8, Qt.AlignmentFlag.AlignTop)
-
+    def updateInfoBar(self):
+        selectedProfit = 0
+        shownProfit = 0
+                
+        for idx in set([idx.row() for idx in self.table.selectedIndexes()]):
+            selectedProfit += self.storeInfo[self.storeKeys[idx]]['store_profit']
+            
+        for rowIdx in range(0, self.table.rowCount()):
+            if not self.table.isRowHidden(rowIdx):
+                shownProfit += self.storeInfo[self.storeKeys[rowIdx]]['store_profit']
+        
+        self.tableInfo.setText(f"Selected Profits: ${selectedProfit},       Total Shown Profits: ${shownProfit}")

@@ -190,7 +190,7 @@ class LoginWindow(SimpleCardWidget):
         return
 
     def removeCSV(self, csvPath, index):
-        print(csvPath)
+        # print(csvPath)
         w = MessageBox("Remove CSV", f'Are you sure you want to remove {csvPath}? This action cannot be undone, and will remove the CSV from /csv and the data from preload.json.', self)
         
         if w.exec():
