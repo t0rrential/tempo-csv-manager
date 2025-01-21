@@ -2,6 +2,12 @@ Widget > QLabel {
     font: 24px 'Segoe UI', 'Microsoft YaHei';
 }
 
+TableView {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
 SettingInterface, #scrollWidget {
     background-color: transparent;
 }

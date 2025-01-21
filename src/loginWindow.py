@@ -69,6 +69,7 @@ class LoginWindow(SimpleCardWidget):
         try:
             csvs = os.listdir("csv\\")
         except Exception as e:
+            # needs to check for csv list, if no list then create one
             print(e)
                 
         # create elements

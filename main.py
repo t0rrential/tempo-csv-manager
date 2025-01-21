@@ -1,5 +1,6 @@
 # coding:utf-8
 import sys
+import os
 
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QIcon, QDesktopServices
@@ -15,9 +16,21 @@ from qfluentwidgets import (NavigationBar, NavigationItemPosition, MessageBox,
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import AcrylicWindow
 
+if not os.path.isdir("store_data"):
+    os.mkdir("store_data")
+    
+if not os.path.isdir("csv"):
+    os.mkdir("csv")
+    
+if not os.path.isfile(".env"):
+    with open(".env", "w") as f:
+        f.write("GOOGLE_MAPS_APIKEY=\"\"")
+        f.write("HOME_ADDRESS=\"\"")
+        f.write("DISCORD_TOKEN=\"\"")
+
+
 #class Window(FramelessWindow):
 class Window(AcrylicWindow):
-    
     def __init__(self):
         super().__init__()
         titleBar = CustomTitleBar(self)

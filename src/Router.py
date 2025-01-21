@@ -30,7 +30,15 @@ class Router():
     def __init__(self):
         self.store_files = {} # {f.split(".")[0]: f for f in listdir(STORE_DATA_DIR) if f.endswith(".json")}
         self.addresses : list[str] = []  # List of addresses
-        self.gclient : googlemaps.Client = googlemaps.Client(key=GOOGLE_MAPS_APIKEY)
+        self.validClient = False
+        
+        self.createGClient()
+        # self.gclient : googlemaps.Client = googlemaps.Client(key=GOOGLE_MAPS_APIKEY)
+
+    def createGClient(self):
+        if Router.checkKey(GOOGLE_MAPS_APIKEY):
+            self.gclient = googlemaps.Client(GOOGLE_MAPS_APIKEY)
+            self.validClient = True
 
     def load_store_data(self, address : str):
         """Load data for a specific store from its JSON file.\n"""
@@ -223,3 +231,12 @@ class Router():
     
     def getHomeAddress():
         return HOME_ADDRESS
+    
+    # def profitableItemsAmount(csv, profitNumber):
+    #     data = None
+        
+    #     with open(csv, "r") as f:
+    #         data = load(f)
+            
+    #     for 
+    #     return
