@@ -29,6 +29,15 @@ class RouterWindow(QWidget):
         
         self.router = Router()
         self.router.prefill()
+        
+        if self.router.validClient:
+            self.labels = ["Address", "Items", "Profits", "Distance"]
+            self.columncount = 4
+        
+        else:
+            self.labels = ["Address", "Items", "Profits"]
+            self.columncount = 3
+        
         self.storeInfo = Router.extractData()
         self.homeAddress = Router.getHomeAddress()
         
@@ -52,7 +61,7 @@ class RouterWindow(QWidget):
         self.rightVBox = QVBoxLayout()
         self.rightSideHolder.setLayout(self.rightVBox)
         
-        self.photoTest = ImageWidget(r"C:\Users\hargo\OneDrive\tempo-csv-manager\map.png")
+        self.photoTest = ImageWidget("map.png")
         self.rightVBox.addWidget(self.photoTest, alignment=Qt.AlignmentFlag.AlignTop)
         
         self.routingTable = TableWidget()
@@ -63,14 +72,16 @@ class RouterWindow(QWidget):
         self.routingTable.setBorderVisible(True)
         self.routingTable.setBorderRadius(8)
         self.routingTable.setWordWrap(True)
-        self.routingTable.setColumnCount(4)
+        self.routingTable.setColumnCount(self.columncount)
         self.routingTable.setRowCount(self.router.storeCount() - 1)
-        self.routingTable.setHorizontalHeaderLabels(["Address", "Items", "Profits", "Distance"])
+        self.routingTable.setHorizontalHeaderLabels(self.labels)
         self.routingTable.verticalHeader().hide()
         self.routingTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         
         self.rightVBox.addWidget(self.routingTable)
-        print("rightSide")
+    
+    # man i should really move all this to a new class
+    # below are all methods for left side of routerWindow
                 
     def leftSide(self):
         # Create Left Side w/ Tables
@@ -136,37 +147,45 @@ class RouterWindow(QWidget):
         self.filterBy.setPlaceholderText("Filter by:")
         self.filterList = {
             "By Profit Descending" : sorted(self.storeInfo.keys(), key = lambda k : self.storeInfo[k]['store_profit'], reverse=True),
-            "By Profit Ascending" : sorted(self.storeInfo.keys(), key = lambda k : self.storeInfo[k]['store_profit']),
-            "By Closest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][self.homeAddress]['distance']),
-            "By Furthest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][self.homeAddress]['distance'], reverse=True)
+            "By Profit Ascending" : sorted(self.storeInfo.keys(), key = lambda k : self.storeInfo[k]['store_profit'])
         }
+        print(self.router.validClient)
+        if self.router.validClient:
+            self.filterList.update({
+                "By Closest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][self.homeAddress]['distance']),
+                "By Furthest Distance" : sorted(self.storeInfo.keys(), key = lambda k : self.router.store_files[k]['distances'][self.homeAddress]['distance'], reverse=True)
+            })
         self.filterBy.addItems([key for key in self.filterList.keys()])
-        self.filterBy.currentIndexChanged.connect(lambda i: self.drawTable(list(self.filterList)[i]))
+        self.filterBy.currentIndexChanged.connect(lambda i: self.drawLeftTable(list(self.filterList)[i]))
         self.secondCommandBarLayout.addWidget(self.filterBy)
              
         self.tableHolderOuterVBox.addLayout(self.secondCommandBarLayout)
         
         
         # create table
-        self.createTable()
+        self.createLeftTable()
         
         self.submitButton = PushButton(FluentIcon.SEND, "")
         
+        # create bottom infobar
         self.infoBar = SimpleCardWidget()
         self.infoBarLayout = QHBoxLayout()
         self.tableInfo = BodyLabel()
         self.infoBarLayout.addWidget(self.tableInfo)
         self.infoBar.setLayout(self.infoBarLayout)
         
-        self.drawTable("By Profit Descending")
+        self.drawLeftTable("By Profit Descending")
         
         self.updateInfoBar()
         
+        # add everything
         self.tableHolderOuterVBox.addWidget(self.table)
         self.tableHolderOuterVBox.addWidget(self.infoBar)
         self.tableHolderOuterVBox.addWidget(self.submitButton)
         
-    def createTable(self):
+    def createLeftTable(self):
+        """Creates the main table on the left side."""
+        
         self.table = TableWidget()
         self.table.setItemDelegate(CustomTableItemDelegate(self.table))
         self.table.setWordWrap(True)
@@ -180,9 +199,9 @@ class RouterWindow(QWidget):
         self.table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.table.itemSelectionChanged.connect(self.updateInfoBar)
         
-        self.table.setColumnCount(4)
+        self.table.setColumnCount(self.columncount)
         self.table.setRowCount(self.router.storeCount() - 1)
-        self.table.setHorizontalHeaderLabels(["Address", "Items", "Profits", "Distance"])
+        self.table.setHorizontalHeaderLabels(self.labels)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
     def searchTable(self, query):
@@ -202,7 +221,7 @@ class RouterWindow(QWidget):
                 self.table.hideRow(i)
         self.updateInfoBar()
         
-    def drawTable(self, filter):
+    def drawLeftTable(self, filter):
         self.storeKeys = self.filterList[filter]
         self.currentFilter = filter
         
@@ -213,7 +232,8 @@ class RouterWindow(QWidget):
             rowList.append(QTableWidgetItem(address))
             rowList.append(QTableWidgetItem(itemList))
             rowList.append(QTableWidgetItem(locale.currency(self.storeInfo[address]['store_profit'], grouping=True)))
-            rowList.append(QTableWidgetItem(f"{self.router.store_files[address]['distances'][self.homeAddress]['distance']} mi"))
+            if self.router.validClient:
+                rowList.append(QTableWidgetItem(f"{self.router.store_files[address]['distances'][self.homeAddress]['distance']} mi"))
             
             for idx, row in enumerate(rowList):
                 row.setToolTip(row.text())
@@ -265,6 +285,16 @@ class RouterWindow(QWidget):
                 shownProfit += self.storeInfo[self.storeKeys[rowIdx]]['store_profit']
         
         self.tableInfo.setText(f"Selected Profits: ${selectedProfit},       Total Shown Profits: ${shownProfit}")
+        
+    def routingButton(self):
+        # to-do:
+        # convert self.table.selectedIndexes() into actual store addresses
+        # feed to router.run()
+        #
+        # inside of router.run():
+        # refactor tsp to take addresses
+        # lookup index of each address to add to formatted tsp
+        self.router.run()
         
     def resizeEvent(self, a0):
         self.table.resizeRowsToContents()

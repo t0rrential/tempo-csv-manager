@@ -1,5 +1,5 @@
 from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QSizePolicy
 from qfluentwidgets import SimpleCardWidget
 

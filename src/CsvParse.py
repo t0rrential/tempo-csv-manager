@@ -55,4 +55,24 @@ def dictToJson(inputDict: dict):
     with open("data.txt", "w") as fp:
         fp.write(real)
     return
+
+def numProfitableItems(csvName, profit):
+    npi = 0
+    total = 0
+    
+    with open("csv\\" + csvName, "r") as file:
+        reader = csv.DictReader(file)
         
+        for row in reader:
+                if (row[' Price'] != ' N/A'):
+                    price, cents = [int(x) for x in row[' Price'].replace(' ', '').split('.')]
+                    profits = profit - price
+                    back = int(row[' Backroom Stock'].replace(' ', ''))
+                    floor = int(row[' Floor Stock'].replace(' ', ''))
+                    
+                    if(profits > 0 and (back > 0 or floor > 0)): 
+                        npi += back + floor
+                        
+                    total += back + floor
+                        
+    return npi 

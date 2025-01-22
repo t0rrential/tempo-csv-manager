@@ -1,6 +1,6 @@
-from dotenv import set_key, load_dotenv
+from dotenv import set_key
 from pathlib import Path
-from os import path, getenv
+from os import getenv
 
 from src.Router import Router
 from src.SelfBot import SelfBot
@@ -9,12 +9,6 @@ from qfluentwidgets import MessageBoxBase, SubtitleLabel, PasswordLineEdit, Body
 from PyQt6.QtCore import Qt
 
 envPath = Path(".env")
-
-if path.isfile(envPath):
-    load_dotenv()
-else:
-    # Create the file if it does not exist.
-    envPath.touch(mode=0o600, exist_ok=False)
 
 HOME_ADDRESS = getenv('HOME_ADDRESS')
 GOOGLE_MAPS_APIKEY = getenv("GOOGLE_MAPS_APIKEY")

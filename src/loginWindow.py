@@ -2,7 +2,7 @@ import os
 from json import dumps, load
 
 from src.ValidateCsv import validate_csv
-from src.CsvParse import dictToJson
+from src.CsvParse import dictToJson, numProfitableItems
 
 from PyQt6.QtCore import Qt
 from PyQt6 import QtWidgets
@@ -46,7 +46,7 @@ class LoginWindow(SimpleCardWidget):
         self.submit.clicked.connect(lambda: self.saveJson())
         
         self.refresh = TransparentToolButton(FluentIcon.SYNC, self)
-        self.refresh.clicked.connect(lambda: self.searchCSV(""))
+        self.refresh.clicked.connect(lambda: self.refreshTable())
         
         self.search = SearchLineEdit()
         self.search.setPlaceholderText("Search for a CSV by filename or itemname")
@@ -96,8 +96,13 @@ class LoginWindow(SimpleCardWidget):
             itemName = LineEdit()
             profit = LineEdit()
             id = LineEdit()
-            
+            profitableItems = CaptionLabel()
+            profitableItems.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+
             topRowLayout.addWidget(CaptionLabel(f"{csv}"))
+            spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+            topRowLayout.addSpacerItem(spacer)
+            topRowLayout.addWidget(profitableItems, alignment=Qt.AlignmentFlag.AlignRight)
             topRowLayout.addWidget(remove, alignment=Qt.AlignmentFlag.AlignRight)
             
             formLayout.addRow(CaptionLabel(f"Item Name:"), itemName)
@@ -113,6 +118,7 @@ class LoginWindow(SimpleCardWidget):
             subelements["itemName"] = itemName
             subelements["profit"] = profit
             subelements["id"] = id
+            subelements["profitableItems"] = profitableItems
             
             self.csvElements[idx] = subelements
         
@@ -133,6 +139,9 @@ class LoginWindow(SimpleCardWidget):
                         self.csvElements[key]["profit"].setText(str(data[key2]["profit"]))
                         self.csvElements[key]["id"].setText(str(data[key2]["id"]))
                         break
+        
+        self.showProfitableItems()
+        
         return
     
     def saveJson(self):
@@ -189,6 +198,17 @@ class LoginWindow(SimpleCardWidget):
             parent=self
         )
         return
+
+    def showProfitableItems(self):
+        for index in self.csvElements.keys():
+            if self.csvElements[index]["profit"] != "" and not validate_csv(self.csvElements[index]["path"]):
+                profitableItems: int = numProfitableItems(self.csvElements[index]["path"], int(self.csvElements[index]["profit"].text()))
+                self.csvElements[index]["profitableItems"].setText(f"{profitableItems} profitable items found")
+        print("ran")
+
+    def refreshTable(self):
+        self.searchCSV("")
+        self.showProfitableItems()
 
     def removeCSV(self, csvPath, index):
         # print(csvPath)

@@ -132,7 +132,7 @@ class Router():
         
         return self.store_files[address]['distances'][target]['response']['rows'][0]['elements'][0]['duration']['value']
     
-    def travellingSalesman(self, numStores : int, numMins: int):
+    def travellingSalesman(self, numStores : int):
         """Applies a travelling salesman solver to the info stored in self.store_files."""
         totaltime = 0
         formatted_tsp = []
@@ -163,7 +163,7 @@ class Router():
         # print()
 
         for i in range(len(best_state) - 1):
-            totaltime += (numMins * 60) + self.findTime(best_state[i], best_state[i + 1])
+            totaltime += self.findTime(best_state[i], best_state[i + 1])
 
         totaltime += self.findTime(best_state[0], best_state[-1])
         
@@ -176,13 +176,14 @@ class Router():
             'time' : totaltime
         }
     
-    def run(self, numStores, numMins):
+    # rewrite to take in address array instead of number of stores
+    def run(self, numStores):
         """Runs prefill(), findCoordinates(), addressPermutations(), addressMatrix(), and returns travellingSalesman()."""
         self.prefill()
         self.findCoordinates()
         self.addressPermutations()
         self.addressMatrix()
-        final = self.travellingSalesman(numStores, numMins)
+        final = self.travellingSalesman(numStores)
         
         return final
     
