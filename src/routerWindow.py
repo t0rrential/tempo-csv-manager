@@ -10,7 +10,7 @@ from src.imageWidget import ImageWidget
 from src.CustomTableItemDelegate import CustomTableItemDelegate
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTableWidgetItem, QSizePolicy, QHeaderView, QAbstractItemView, QTableWidget
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTableWidgetItem, QSizePolicy, QHeaderView, QAbstractItemView
 from qfluentwidgets import (SearchLineEdit, PushButton, SimpleCardWidget, TableWidget, FluentIcon, SpinBox, CommandBar, Action,
                             TransparentToolButton, ComboBox, BodyLabel)
 
@@ -190,12 +190,9 @@ class RouterWindow(QWidget):
         self.table.setItemDelegate(CustomTableItemDelegate(self.table))
         self.table.setWordWrap(True)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
-        # self.table.setBorderVisible(True)
-        # self.table.setBorderRadius(8)
         self.table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.table.itemSelectionChanged.connect(self.updateInfoBar)
         
@@ -203,6 +200,16 @@ class RouterWindow(QWidget):
         self.table.setRowCount(self.router.storeCount() - 1)
         self.table.setHorizontalHeaderLabels(self.labels)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        
+        headers = self.table.horizontalHeader()
+        headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        headers.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        if self.router.validClient:
+            headers.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+            # lowk this might be an issue for later, but keep this line in mind
+            # when you implement a way for gclient to be added and then table
+            # refreshed
 
     def searchTable(self, query):
         keys = []

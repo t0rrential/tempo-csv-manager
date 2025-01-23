@@ -2,12 +2,14 @@ import os
 from json import dumps, load
 
 from src.ValidateCsv import validate_csv
-from src.CsvParse import dictToJson, numProfitableItems
+from src.CsvParse import dictToJson, numProfitableItems, getLastModifiedTime
+from src.CustomTableItemDelegate import CustomTableItemDelegate, PaddedWidget
 
 from PyQt6.QtCore import Qt
-from PyQt6 import QtWidgets
-from qfluentwidgets import (LineEdit, LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBox, TransparentToolButton,
-                           SmoothScrollArea, TransparentPushButton, CardWidget, SimpleCardWidget, SearchLineEdit)
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QSizePolicy, QHeaderView, QAbstractItemView
+from qfluentwidgets import (LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBox, TransparentToolButton,
+                           SmoothScrollArea, TransparentPushButton, SimpleCardWidget, SearchLineEdit,
+                           TableWidget)
 
 from qfluentwidgets.components.widgets.label import CaptionLabel
 
@@ -25,7 +27,10 @@ class LoginWindow(SimpleCardWidget):
         self.widget = SimpleCardWidget()
         
         # Create the layout with textboxes and checkboxes
-        self.outerLayout = QtWidgets.QVBoxLayout()
+        self.outerLayout = QVBoxLayout()
+        
+        # create table
+        self.createTable()
         
         # fill widget with subwidgets
         self.fillTable()
@@ -37,12 +42,12 @@ class LoginWindow(SimpleCardWidget):
         
         # Create save and calculate buttons
         self.buttons = SimpleCardWidget()
-        buttonLayout = QtWidgets.QHBoxLayout()
+        buttonLayout = QHBoxLayout()
         buttonLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.buttons.setLayout(buttonLayout)
         
         self.submit = TransparentPushButton(FluentIcon.SAVE, "Save CSV Values", self)
-        self.submit.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
+        self.submit.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.submit.clicked.connect(lambda: self.saveJson())
         
         self.refresh = TransparentToolButton(FluentIcon.SYNC, self)
@@ -50,19 +55,44 @@ class LoginWindow(SimpleCardWidget):
         
         self.search = SearchLineEdit()
         self.search.setPlaceholderText("Search for a CSV by filename or itemname")
-        self.search.searchSignal.connect(lambda: self.searchCSV(self.search.text()))
-        self.search.clearSignal.connect(lambda: self.searchCSV(""))
+        self.search.searchSignal.connect(lambda: self.searchTable(self.search.text()))
+        self.search.returnPressed.connect(lambda: self.searchTable(self.search.text()))
+        self.search.clearSignal.connect(lambda: self.searchTable(""))
 
         buttonLayout.addWidget(self.refresh)
         buttonLayout.addWidget(self.submit)
         buttonLayout.addWidget(self.search, Qt.AlignmentFlag.AlignLeft)
                 
         # Set scroll area as the main layout
-        mainLayout = QtWidgets.QVBoxLayout()
+        mainLayout = QVBoxLayout()
         mainLayout.addWidget(self.buttons)
         mainLayout.addWidget(self.scroll)
         self.setLayout(mainLayout)
         self.prefill()
+    
+    def createTable(self):
+        self.table = TableWidget()
+        self.table.setItemDelegate(CustomTableItemDelegate(self.table))
+        self.table.setWordWrap(True)
+        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self.table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.table.setColumnCount(8)
+        self.table.setRowCount(len(os.listdir("csv\\")))
+        self.table.setHorizontalHeaderLabels(["File", "Last Modified", "Item Name", "Sale Price", "Item ID", "Total", "Profitable", ""])
+        
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(7, QHeaderView.ResizeMode.Fixed)
+        
+        self.outerLayout.addWidget(self.table)
     
     def fillTable(self):        
         # get list of csvs
@@ -75,55 +105,35 @@ class LoginWindow(SimpleCardWidget):
         # create elements
         for idx, csv in enumerate(csvs):
             subelements = {}
-            #print(csv)
-            outFrame = CardWidget()
-            
-            topLayout = QtWidgets.QVBoxLayout()
-            topRowLayout = QtWidgets.QHBoxLayout()
-            formLayout = QtWidgets.QFormLayout()
-            topLayout.addLayout(topRowLayout)
-            topLayout.addLayout(formLayout)
-            
-            # create inputs
-            remove = TransparentPushButton(FluentIcon.CANCEL_MEDIUM, "Remove")
-                # lambda explanation:
-                # _ is the signal param passed to connect, which we can discard
-                # by doing csv_path = csv, we can ensure self.removeCSV gets the correct one
-                # as python lambdas/closures get variables by reference, not by value
-                # think of it passing a pointer to csv instead of csv itself, and because
-                # csv is defined by enumerate it will end up pointing to the last held csv value
-            remove.clicked.connect(lambda _, csv_path=csv, index=idx: self.removeCSV(csv_path, index))
+                        
+            filepathElement = CaptionLabel(f"{csv}")
+            modified = CaptionLabel(getLastModifiedTime(csv))
             itemName = LineEdit()
             profit = LineEdit()
             id = LineEdit()
-            profitableItems = CaptionLabel()
-            profitableItems.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+            totalItems = CaptionLabel("")
+            profitableItems = CaptionLabel("")
+            remove = TransparentPushButton(FluentIcon.CANCEL_MEDIUM, "Remove")
 
-            topRowLayout.addWidget(CaptionLabel(f"{csv}"))
-            spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-            topRowLayout.addSpacerItem(spacer)
-            topRowLayout.addWidget(profitableItems, alignment=Qt.AlignmentFlag.AlignRight)
-            topRowLayout.addWidget(remove, alignment=Qt.AlignmentFlag.AlignRight)
+            remove.clicked.connect(lambda _, csv_path=csv, index=idx: self.removeCSV(csv_path, index))
+            itemName.setPlaceholderText("Item Name")
+            profit.setPlaceholderText("Sale Price")
+            id.setPlaceholderText("Item ID")
             
-            formLayout.addRow(CaptionLabel(f"Item Name:"), itemName)
-            formLayout.addRow(CaptionLabel(f"Sale Price:"), profit)
-            formLayout.addRow(CaptionLabel(f"Item ID:"), id)
+            items = [filepathElement, modified, PaddedWidget(itemName), PaddedWidget(profit), PaddedWidget(id), totalItems, profitableItems, remove]
             
-            outFrame.setLayout(topLayout)
-            
-            self.outerLayout.addWidget(outFrame)
+            for itemIdx, item in enumerate(items):
+                self.table.setCellWidget(idx, itemIdx, item)
             
             subelements["path"] = csv
-            subelements["outframe"] = outFrame
             subelements["itemName"] = itemName
             subelements["profit"] = profit
             subelements["id"] = id
+            subelements["totalItems"] = totalItems
             subelements["profitableItems"] = profitableItems
             
             self.csvElements[idx] = subelements
-        
-        #print(len(self.csvElements))
-    
+            
     def prefill(self):
         # using the data in previously stored csvs created by updatejson,
         # we fill the lineedits with the already stored text
@@ -202,12 +212,12 @@ class LoginWindow(SimpleCardWidget):
     def showProfitableItems(self):
         for index in self.csvElements.keys():
             if self.csvElements[index]["profit"] != "" and not validate_csv(self.csvElements[index]["path"]):
-                profitableItems: int = numProfitableItems(self.csvElements[index]["path"], int(self.csvElements[index]["profit"].text()))
-                self.csvElements[index]["profitableItems"].setText(f"{profitableItems} profitable items found")
-        print("ran")
+                profitable, total= numProfitableItems(self.csvElements[index]["path"], int(self.csvElements[index]["profit"].text()))
+                self.csvElements[index]["profitableItems"].setText(f"{profitable}")
+                self.csvElements[index]["totalItems"].setText(f"{total}")
 
     def refreshTable(self):
-        self.searchCSV("")
+        self.searchTable("")
         self.showProfitableItems()
 
     def removeCSV(self, csvPath, index):
@@ -222,21 +232,24 @@ class LoginWindow(SimpleCardWidget):
             self.fillTable()
             self.prefill()
             
-    def searchCSV(self, query):
+    def searchTable(self, query):
         # search through csvElements (holds widgets)
         keys = []
+        print(f"searching with query '{query}'")
         
         for key in self.csvElements.keys():
             if query in self.csvElements[key]['itemName'].text() or query in self.csvElements[key]['path']:
                 keys.append(key)
-                
-        self.updateOuterLayoutVisibility(keys)
+        
+        print(f"{keys}")
+        self.updateVisibility(keys)
     
-    def updateOuterLayoutVisibility(self, elements : list):
-        for index in range(self.outerLayout.count()):
+    def updateVisibility(self, elements : list):
+        for index in self.csvElements.keys():
             if index in elements:
-                self.outerLayout.itemAt(index).widget().setVisible(True)
+                self.table.showRow(index)
             else:
-                self.outerLayout.itemAt(index).widget().setVisible(False)
+                self.table.hideRow(index)
+                
 
         

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QStyleOptionViewItem
+from PyQt6.QtWidgets import QStyleOptionViewItem, QVBoxLayout, QWidget
 from PyQt6.QtGui import QPainter, QTextOption, QColor
 from PyQt6.QtCore import QRectF, QSize, Qt, QRect
 
@@ -16,9 +16,10 @@ class CustomTableItemDelegate(TableItemDelegate):
         option.features |= QStyleOptionViewItem.ViewItemFeature.WrapText
         
         text = index.data(Qt.ItemDataRole.DisplayRole)
-        rect = option.rect.adjusted(5, 5, -5, -5)  # Add padding
+        padding = 2
+        rect = option.rect.adjusted(padding, padding, -padding, -padding)  # Add padding
 
-        # draw highlight backgroundaW
+        # draw highlight background
         isHover = self.hoverRow == index.row()
         isPressed = self.pressedRow == index.row()
         isAlternate = index.row() % 2 == 0 and self.parent().alternatingRowColors()
@@ -68,3 +69,10 @@ class CustomTableItemDelegate(TableItemDelegate):
         width = option.rect.width()
         height = metrics.boundingRect(QRect(0, 0, width, 0), Qt.TextFlag.TextWordWrap, text).height()
         return QSize(width, height + 10)  # Adding 10 for padding
+
+class PaddedWidget(QWidget):
+    def __init__(self, widget, padding=10):
+        super().__init__()
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(padding, padding, padding, padding)
+        self.layout.addWidget(widget)

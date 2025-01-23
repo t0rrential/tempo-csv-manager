@@ -1,5 +1,7 @@
 import csv
 import math
+from os.path import getmtime
+import datetime
 from json import dumps
 
 def dictToJson(inputDict: dict):
@@ -75,4 +77,13 @@ def numProfitableItems(csvName, profit):
                         
                     total += back + floor
                         
-    return npi 
+    return [npi, total]
+
+def getLastModifiedTime(csvPath):
+    csvPath = "csv\\" + csvPath
+    
+    timestamp = getmtime(csvPath)
+    date = datetime.date.fromtimestamp(timestamp)
+    formatted = date.strftime("%m/%d/%Y")
+    
+    return formatted

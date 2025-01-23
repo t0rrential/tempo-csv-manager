@@ -146,6 +146,13 @@ class Router():
                 if target in self.addresses[:numStores]:
                     formatted_tsp.append((self.addresses.index(address), self.addresses.index(target), self.store_files[address]["distances"][target]['distance']))
 
+        # for when numstores becomes list-based
+        storeList = []
+        for index in storeList:
+            for target in self.store_files[address]['distances'].keys():
+                if target in storeList:
+                    formatted_tsp.append((self.addresses.index(address), self.addresses.index(target), self.store_files[address]["distances"][target]['distance']))
+
         fitness_distances = TravellingSales(distances=formatted_tsp)
         problem_fit = TSPOpt(length=numStores, fitness_fn=fitness_distances, maximize=False)
 
@@ -232,12 +239,3 @@ class Router():
     
     def getHomeAddress():
         return HOME_ADDRESS
-    
-    # def profitableItemsAmount(csv, profitNumber):
-    #     data = None
-        
-    #     with open(csv, "r") as f:
-    #         data = load(f)
-            
-    #     for 
-    #     return
