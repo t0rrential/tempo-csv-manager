@@ -1,4 +1,4 @@
-import os
+from os import listdir, path, remove
 from json import dumps, load
 
 from src.ValidateCsv import validate_csv
@@ -76,10 +76,10 @@ class LoginWindow(SimpleCardWidget):
         self.table.setWordWrap(True)
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.table.verticalHeader().setVisible(False)
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.Nelection)
         self.table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.table.setColumnCount(8)
-        self.table.setRowCount(len(os.listdir("csv\\")))
+        self.table.setRowCount(len(listdir("csv\\")))
         self.table.setHorizontalHeaderLabels(["File", "Last Modified", "Item Name", "Sale Price", "Item ID", "Total", "Profitable", ""])
         
         header = self.table.horizontalHeader()
@@ -97,7 +97,7 @@ class LoginWindow(SimpleCardWidget):
     def fillTable(self):        
         # get list of csvs
         try:
-            csvs = os.listdir("csv\\")
+            csvs = listdir("csv\\")
         except Exception as e:
             # needs to check for csv list, if no list then create one
             print(e)
@@ -113,7 +113,7 @@ class LoginWindow(SimpleCardWidget):
             id = LineEdit()
             totalItems = CaptionLabel("")
             profitableItems = CaptionLabel("")
-            remove = TransparentPushButton(FluentIcon.CANCEL_MEDIUM, "Remove")
+            remove = TransparentPushButton(FluentIcon.CANCEL_MEDIUM)
 
             remove.clicked.connect(lambda _, csv_path=csv, index=idx: self.removeCSV(csv_path, index))
             itemName.setPlaceholderText("Item Name")
@@ -138,7 +138,7 @@ class LoginWindow(SimpleCardWidget):
         # using the data in previously stored csvs created by updatejson,
         # we fill the lineedits with the already stored text
         
-        if os.path.exists("preload.json"):
+        if path.exists("preload.json"):
             with open("preload.json", "r") as f:
                 data = load(f)
         
@@ -225,7 +225,7 @@ class LoginWindow(SimpleCardWidget):
         w = MessageBox("Remove CSV", f'Are you sure you want to remove {csvPath}? This action cannot be undone, and will remove the CSV from /csv and the data from preload.json.', self)
         
         if w.exec():
-            os.remove(f"csv/{csvPath}")
+            remove(f"csv/{csvPath}")
             self.csvElements.pop(index, None)
             # self.saveJson()
             # self.searchCSV("") 

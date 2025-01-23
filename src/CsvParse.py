@@ -1,5 +1,5 @@
-import csv
-import math
+from csv import DictReader
+from math import ceil
 from os.path import getmtime
 import datetime
 from json import dumps
@@ -11,7 +11,7 @@ def dictToJson(inputDict: dict):
     for key in inputDict.keys():
         
         with open("csv\\" + inputDict[key]['path'], 'r') as file:
-            reader = csv.DictReader(file)
+            reader = DictReader(file)
             
             for row in reader:
                 if (row[' Price'] != ' N/A'):
@@ -46,7 +46,7 @@ def dictToJson(inputDict: dict):
                             }
                         
                         dataDict[address]['itemList'].append(key)
-                        dataDict[address]['store_profit'] += math.ceil(tprofits)
+                        dataDict[address]['store_profit'] += ceil(tprofits)
                         dataDict[address]['store_profit'] = int(dataDict[address]['store_profit'])
                         totalprofits +=  tprofits
 
@@ -63,7 +63,7 @@ def numProfitableItems(csvName, profit):
     total = 0
     
     with open("csv\\" + csvName, "r") as file:
-        reader = csv.DictReader(file)
+        reader = DictReader(file)
         
         for row in reader:
                 if (row[' Price'] != ' N/A'):
