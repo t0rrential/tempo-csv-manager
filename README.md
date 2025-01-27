@@ -1,6 +1,6 @@
 # tempo-csv-manager
 
-todo:\  
+todo: \
 [> selection state is not index based but linked to address \
 [> faster gui response times \
 [> righttable updated columns and rows \
@@ -18,4 +18,4 @@ other stuff importante   \
 [> settings box rewrite \
 \
 major rewrites:  \
-[> transfer current system to a sqlite platform with a .db file (easier in every single way lol) \
+[> transfer current system to a sqlite platform with a .db file (easier in every single way lol) 
