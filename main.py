@@ -3,8 +3,8 @@ import sys
 import os
 
 from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QIcon, QDesktopServices
-from PyQt6.QtWidgets import QHBoxLayout, QApplication
+from PyQt6.QtGui import QIcon, QDesktopServices, QPixmap
+from PyQt6.QtWidgets import QHBoxLayout, QApplication, QSplashScreen
 
 from src.UITemplate import StackedWidget, CustomTitleBar
 from src.loginWindow import LoginWindow
@@ -33,6 +33,7 @@ if not os.path.isfile(".env"):
 class Window(AcrylicWindow):
     def __init__(self):
         super().__init__()
+        self.setMinimumSize(200, 150)
         titleBar = CustomTitleBar(self)
         titleBar.linkThemeToggleButton(lambda: self.toggleCurrentTheme())
         titleBar.setIcon("logo.png")
@@ -53,7 +54,7 @@ class Window(AcrylicWindow):
         # create sub interface
         # self.homeInterface = Widget('Home Interface', self)
         self.homeInterface = LoginWindow(self)
-        self.appInterface = RouterWindow(self)
+        self.appInterface = RouterWindow(self)        
         # self.videoInterface = Widget('Video Interface', self)
         # self.libraryInterface = Widget('library Interface', self)
 
@@ -100,7 +101,7 @@ class Window(AcrylicWindow):
         self.navigationBar.setCurrentItem(self.homeInterface.objectName())
 
     def initWindow(self):
-        self.resize(900, 700)
+        #self.resize(900, 700)
         # self.setWindowIcon(QIcon())
         self.setWindowTitle('Tempo CSV Manager')
         self.titleBar.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
@@ -169,6 +170,12 @@ if __name__ == '__main__':
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
     app = QApplication(sys.argv)
+    pixmap = QPixmap("logo.png")
+    splash = QSplashScreen(pixmap)
+    splash.show()
+    
     w = Window()
     w.show()
+    splash.finish(w)
+    
     sys.exit(app.exec())

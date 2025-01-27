@@ -65,9 +65,9 @@ They will only be used to communicate with Discord, Google Maps, and to calculat
         dcToken = self.discordToken.text()
         addr = self.homeLineEdit.text()
         
-        checkGmaps = Router.checkKey(gmToken)
-        if not(checkGmaps):
-            invalid.append("Google Maps API Token")
+        # checkGmaps = Router.checkKey(gmToken)
+        # if not(checkGmaps):
+        #     invalid.append("Google Maps API Token")
         
         checkBot = SelfBot()
         checkDiscord = checkBot.check(dcToken)

@@ -2,13 +2,14 @@ from PyQt6.QtWidgets import QStyleOptionViewItem, QVBoxLayout, QWidget
 from PyQt6.QtGui import QPainter, QTextOption, QColor
 from PyQt6.QtCore import QRectF, QSize, Qt, QRect
 
-from qfluentwidgets import TableItemDelegate, isDarkTheme
+from qfluentwidgets import TableItemDelegate, isDarkTheme, themeColor
 
 class CustomTableItemDelegate(TableItemDelegate):
     def __init__(self, parent):
         TableItemDelegate.__init__(self, parent)
     
-    def paint(self, painter, option, index):
+    def paint(self, painter, option, index):   
+        painter.setBrush(themeColor())     
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)          
         # Enable text wrapping
@@ -16,7 +17,7 @@ class CustomTableItemDelegate(TableItemDelegate):
         option.features |= QStyleOptionViewItem.ViewItemFeature.WrapText
         
         text = index.data(Qt.ItemDataRole.DisplayRole)
-        padding = 2
+        padding = 10
         rect = option.rect.adjusted(padding, padding, -padding, -padding)  # Add padding
 
         # draw highlight background
@@ -47,7 +48,6 @@ class CustomTableItemDelegate(TableItemDelegate):
             painter.setBrush(index.data(Qt.ItemDataRole.BackgroundRole))
         else:
             painter.setBrush(QColor(c, c, c, alpha))
-
         # self._drawBackground(painter, option, index)
 
         # draw indicator
@@ -68,7 +68,7 @@ class CustomTableItemDelegate(TableItemDelegate):
         metrics = option.fontMetrics
         width = option.rect.width()
         height = metrics.boundingRect(QRect(0, 0, width, 0), Qt.TextFlag.TextWordWrap, text).height()
-        return QSize(width, height + 10)  # Adding 10 for padding
+        return QSize(width, height + 20)  # Adding 10 for padding
 
 class PaddedWidget(QWidget):
     def __init__(self, widget, padding=10):

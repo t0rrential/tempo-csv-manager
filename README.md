@@ -1,19 +1,21 @@
 # tempo-csv-manager
 
-todo:  
-: save itemid to csv and preload  
-: discord integration  
-: finish datawindow  
-: full datawindow integration into mainwindow and good compatibility with loginwindow  
-: add recalc button to loginwindow  
-: setup gmaps static image api  
-: messagebox for user secrets (home address, gmaps api key, dc token)  
-  
-other stuff importante  
-: check for .env file existence  
-: in router, check for .env existence and don't create self.gclient unless the apikey is valid
-: in dataWindow, make the option to have distance and distance filters togglable based on whether or not apikey is valid
-: in main.py, ensure all things have been setup already (csv folder, store_data folder, )
-
-major rewrites:  
-: transfer current system to a sqlite platform with a .db file (easier in every single way lol) 
+todo:\  
+[> selection state is not index based but linked to address \
+[> faster gui response times \
+[> righttable updated columns and rows \
+[> unified drawTable method (no right, left, or filter) \
+[> add/remove items from calculations \
+[> exclude csv from calculations \
+[> gmaps photo integration \
+[> exclude store from calculations \
+[> send list of items somewhere eg notes gmail phone \
+[> open list of tabs in correct order \
+   \
+other stuff importante   \
+[> all widget updates to async (super hard) \
+[> discord integration \
+[> settings box rewrite \
+\
+major rewrites:  \
+[> transfer current system to a sqlite platform with a .db file (easier in every single way lol) \

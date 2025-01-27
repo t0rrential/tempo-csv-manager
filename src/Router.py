@@ -12,7 +12,7 @@ import googlemaps.addressvalidation
 import googlemaps.client
 from mlrose_ky import TravellingSales, TSPOpt, genetic_alg
 
-import simplekml
+import datetime
 import googlemaps
 import urllib
 import numpy
@@ -36,9 +36,9 @@ class Router():
         # self.gclient : googlemaps.Client = googlemaps.Client(key=GOOGLE_MAPS_APIKEY)
 
     def createGClient(self):
-        if Router.checkKey(GOOGLE_MAPS_APIKEY):
-            self.gclient = googlemaps.Client(GOOGLE_MAPS_APIKEY)
-            self.validClient = True
+        # if Router.checkKey(GOOGLE_MAPS_APIKEY):
+        self.gclient = googlemaps.Client(GOOGLE_MAPS_APIKEY)
+        self.validClient = True
 
     def load_store_data(self, address : str):
         """Load data for a specific store from its JSON file.\n"""
@@ -122,8 +122,8 @@ class Router():
                             
                             self.save_store_data(addr1)
                             self.save_store_data(addr2)
-                        except Exception as e:
-                            print(f"error on {pair} with exception {e}")
+                        except Exception as e: # add retry logic
+                            print(f"error on address {address}, {pair} with exception {e}")
     
     def findTime(self, address, target):
         """Finds the time between two addresses that have been stored in self.store_files."""
@@ -132,55 +132,58 @@ class Router():
         
         return self.store_files[address]['distances'][target]['response']['rows'][0]['elements'][0]['duration']['value']
     
-    def travellingSalesman(self, numStores : int):
+    def travellingSalesman(self, storeList):
         """Applies a travelling salesman solver to the info stored in self.store_files."""
         totaltime = 0
         formatted_tsp = []
-        # formatted_tsp[n] = [addr1, addr2, dist]
-
+        storeList.append(self.addresses[0])
+        
+        # TravellingSales takes nodes in numerical order, meaning nodes must go 0, 1, 2, .., n
+        # storeList only has the indexes of the stores within self.storeKeys, so we need a lookup
+        # table to convert back to indexes afterwards
+        nodeLookup = dict([(idx, self.addresses.index(storeIndex)) for idx, storeIndex in enumerate(storeList)])
+        reverseNodeLookup = {val : key for key, val in nodeLookup.items()}
+        
+        # print(f"{nodeLookup}\n{reverseNodeLookup}")
+        
         # loop logic goes as follows:
         # for address in self.addresses, make another loop going through distance responses
         # check the targetted address is within numStores. if so, append to formatted_tsp
-        for address in self.addresses[:numStores]:
-            for target in self.store_files[address]['distances'].keys():
-                if target in self.addresses[:numStores]:
-                    formatted_tsp.append((self.addresses.index(address), self.addresses.index(target), self.store_files[address]["distances"][target]['distance']))
 
-        # for when numstores becomes list-based
-        storeList = []
-        for index in storeList:
-            for target in self.store_files[address]['distances'].keys():
+        for store in storeList:
+            for target in self.store_files[store]['distances'].keys():
                 if target in storeList:
-                    formatted_tsp.append((self.addresses.index(address), self.addresses.index(target), self.store_files[address]["distances"][target]['distance']))
-
+                    formatted_tsp.append((self.addresses.index(store), self.addresses.index(target), self.store_files[store]["distances"][target]['distance']))
+        
+        for idx in range(len(formatted_tsp)):
+            listedTuple = list(formatted_tsp[idx])
+            listedTuple[0] = reverseNodeLookup[listedTuple[0]]
+            listedTuple[1] = reverseNodeLookup[listedTuple[1]]
+            
+            formatted_tsp[idx] = listedTuple
+                 
         fitness_distances = TravellingSales(distances=formatted_tsp)
-        problem_fit = TSPOpt(length=numStores, fitness_fn=fitness_distances, maximize=False)
+        problem_fit = TSPOpt(length=len(storeList), fitness_fn=fitness_distances, maximize=False)
 
         best_state, bf, fc = genetic_alg(problem_fit, random_state=2)
         best_state = best_state.tolist()
-        best_state = numpy.roll(best_state, best_state.index(0))
-
-        routing = []
         
+        best_state = [nodeLookup[key] for key in best_state]
+        
+        best_state = numpy.roll(best_state, len(best_state) - best_state.index(0))
+        
+        routing = []
         for index in best_state:
             routing.append(self.addresses[index])
-        # print("In order, best state goes:")
-        # for index in best_state:
-        #     print(self.addresses[index], end=", ")
-        # print()
 
         for i in range(len(best_state) - 1):
             totaltime += self.findTime(best_state[i], best_state[i + 1])
 
         totaltime += self.findTime(best_state[0], best_state[-1])
         
-        totaltime /= 3600
-
-        #print(f"Total hours will be {totaltime / 3600}")
-        
         return {
             'routing': routing,
-            'time' : totaltime
+            'time' : datetime.timedelta(seconds=totaltime)
         }
     
     # rewrite to take in address array instead of number of stores
