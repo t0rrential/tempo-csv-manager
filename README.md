@@ -10,7 +10,7 @@ features:
 
 ## setup
 
-This project is still under development. If you would like to try it out for yourself, go over to the build branch of this project and clone it to your local workspace.
+This project is still under development. If you would like to try it out for yourself, go over to the [build branch](https://github.com/t0rrential/tempo-csv-manager/tree/build) of this project and clone it to your local workspace.
 
 ```bash
 pip install -r requirements.txt
