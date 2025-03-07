@@ -3,8 +3,8 @@
 python project designed to work with tempo monitor csvs, for windows 10/11.
 
 features:
-• shortest path between all stores using travelling-salesman problem solver
-• stores sortable by distance, profitability, and cost/profit ratio
+• shortest path between all stores using travelling-salesman problem solver\n
+• stores sortable by distance, profitability, and cost/profit ratio\n
 • google maps api integration for distance and map photos
 • dark theme / light theme
 
