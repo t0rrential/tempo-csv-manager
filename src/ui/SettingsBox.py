@@ -2,8 +2,8 @@ from dotenv import set_key
 from pathlib import Path
 from os import getenv
 
-from src.Router import Router
-from src.SelfBot import SelfBot
+from src.webapi.Router import Router
+from src.webapi.SelfBot import SelfBot
 
 from qfluentwidgets import MessageBoxBase, SubtitleLabel, PasswordLineEdit, BodyLabel, LineEdit, InfoBar, InfoBarPosition
 from PyQt6.QtCore import Qt

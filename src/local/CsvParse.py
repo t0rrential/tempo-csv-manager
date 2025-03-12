@@ -3,7 +3,7 @@ from math import ceil
 from os.path import getmtime
 from json import dumps
 
-from src.ValidateCsv import csvConverter
+from src.local.ValidateCsv import csvConverter
 
 import datetime
 

@@ -6,10 +6,10 @@ from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QIcon, QDesktopServices, QPixmap
 from PyQt6.QtWidgets import QHBoxLayout, QApplication, QSplashScreen
 
-from src.UITemplate import StackedWidget, CustomTitleBar
-from src.loginWindow import LoginWindow
-from src.routerWindow import RouterWindow
-from src.SettingsBox import SettingsBox
+from src.components.UITemplate import StackedWidget, CustomTitleBar
+from src.ui.LoginWindow import LoginWindow
+from src.ui.RouterWindow import RouterWindow
+from src.ui.SettingsBox import SettingsBox
 
 from qfluentwidgets import (NavigationBar, NavigationItemPosition, MessageBox,
                             isDarkTheme, setTheme, Theme, setThemeColor)
@@ -36,8 +36,8 @@ class Window(AcrylicWindow):
         self.setMinimumSize(200, 150)
         titleBar = CustomTitleBar(self)
         titleBar.linkThemeToggleButton(lambda: self.toggleCurrentTheme())
-        titleBar.setIcon("logo.png")
-        self.setWindowIcon(QIcon('logo.png'))
+        titleBar.setIcon(r"resource/logo.png")
+        self.setWindowIcon(QIcon(r'resource/logo.png'))
         self.setTitleBar(titleBar)
 
         # theme set

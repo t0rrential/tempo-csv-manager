@@ -1,15 +1,15 @@
 from os import listdir, path, remove
 from json import dumps, load
 
-from src.ValidateCsv import validate_csv
-from src.CsvParse import dictToJson, numProfitableItems, getLastModifiedTime, itemStats, itemInfo
-from src.CustomTableItemDelegate import CustomTableItemDelegate, PaddedWidget
+from src.local.ValidateCsv import validate_csv
+from src.local.CsvParse import dictToJson, numProfitableItems, getLastModifiedTime, itemStats, itemInfo
+from src.components.CustomTableItemDelegate import PaddedWidget
+from src.components.CustomTable import CustomTable
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QSizePolicy, QHeaderView, QAbstractItemView, QTableWidgetItem
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QSizePolicy, QTableWidgetItem
 from qfluentwidgets import (LineEdit, FluentIcon, InfoBarPosition, InfoBar, MessageBox, TransparentToolButton,
-                           SmoothScrollArea, TransparentPushButton, SimpleCardWidget, SearchLineEdit,
-                           TableWidget)
+                           SmoothScrollArea, TransparentPushButton, SimpleCardWidget, SearchLineEdit)
 
 from qfluentwidgets.components.widgets.label import CaptionLabel
 
@@ -30,7 +30,8 @@ class LoginWindow(SimpleCardWidget):
         self.outerLayout = QVBoxLayout()
         
         # create table
-        self.createTable()
+        self.table = CustomTable("login")
+        self.outerLayout.addWidget(self.table)
         
         # fill widget with subwidgets
         self.fillTable()
@@ -71,34 +72,6 @@ class LoginWindow(SimpleCardWidget):
         self.prefill()
         self.table.resizeRowsToContents()
     
-    def createTable(self):
-        self.table = TableWidget()
-        self.table.setItemDelegate(CustomTableItemDelegate(self.table)) # custom delegate
-        self.table.setWordWrap(True)
-        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        self.table.verticalHeader().setVisible(False)
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.table.setColumnCount(11)
-        self.table.setRowCount(len(listdir("csv\\")))
-        self.table.setHorizontalHeaderLabels(["File", "Last Modified", "Item Name", "Sale Price", "Item ID", "MSRP", " Avg ", " Low ", "Total", "Profit", ""])
-        header = self.table.horizontalHeader()
-        
-        # table header settings to make everything fit
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Interactive)
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(7, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(8, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(9, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(10, QHeaderView.ResizeMode.ResizeToContents)
-                
-        self.outerLayout.addWidget(self.table)
-    
     def fillTable(self):        
         # get list of csvs
         try:
@@ -108,6 +81,9 @@ class LoginWindow(SimpleCardWidget):
             print(e)
                 
         # create elements
+        for i in range(len(csvs)):
+            self.table.insertRow(i)
+            
         for idx, csv in enumerate(csvs):
             subelements = {}
                         

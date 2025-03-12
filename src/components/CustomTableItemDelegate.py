@@ -4,6 +4,7 @@ from PyQt6.QtCore import QRectF, QSize, Qt, QRect
 
 from qfluentwidgets import TableItemDelegate, isDarkTheme, themeColor
 
+
 class CustomTableItemDelegate(TableItemDelegate):
     def __init__(self, parent):
         TableItemDelegate.__init__(self, parent)
@@ -68,7 +69,7 @@ class CustomTableItemDelegate(TableItemDelegate):
         metrics = option.fontMetrics
         width = option.rect.width()
         height = metrics.boundingRect(QRect(0, 0, width, 0), Qt.TextFlag.TextWordWrap, text).height()
-        return QSize(width, height + 20)  # Adding 10 for padding
+        return QSize(width, height + 30)  # Adding 10 for padding
 
 class PaddedWidget(QWidget):
     def __init__(self, widget, padding=10):
